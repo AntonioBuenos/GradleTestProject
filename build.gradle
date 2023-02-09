@@ -2,9 +2,13 @@ plugins {
     id 'java'
 }
 
+ext{
+    javaVersion = JavaVersion.VERSION_1_8
+}
+
 group 'ru.clevertec.smirnov'
 version '1.3.5'
-sourceCompatibility = 1.8
+sourceCompatibility = javaVersion
 
 repositories {
     mavenCentral()
@@ -18,23 +22,17 @@ dependencies {
 }
 
 jar {
-    def jars = configurations.runtimeClasspath.files.collect { "lib/$it.name" }
     baseName 'utils'
     manifest {
-        attributes 'Main-Class': 'ru.clevertec.smirnov.Main',
-                'Class-Path': jars.join(' '),
-                'Implementation-Title': archiveBaseName,
+        attributes 'Implementation-Title': archiveBaseName,
                 'Implementation-Version': archiveVersion
 
     }
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    from (configurations.runtimeClasspath.files.collect {zipTree(it)} )
 
 }
-
-task copyAllDependecies(type: Copy) {
-    from(configurations.runtimeClasspath.files)
-    into("$buildDir/libs/lib")
-}
-jar.dependsOn copyAllDependecies
 
 test {
     useJUnitPlatform()
